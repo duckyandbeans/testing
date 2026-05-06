@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secret Coin Flip Game</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f4f8;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+        }
+
+        h1 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+
+        .input-group {
+            margin: 15px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        select {
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+        }
+
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 15px;
+            width: 100%;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        button:disabled {
+            background-color: #95a5a6;
+            cursor: not-allowed;
+        }
+
+        /* Coin Animation Styles */
+        .coin-container {
+            width: 100px;
+            height: 100px;
+            margin: 30px auto;
+            perspective: 1000px;
+            display: none;
+        }
+
+        .coin {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 2s ease-in-out;
+        }
+
+        .coin-face {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            backface-visibility: hidden;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: bold;
+            color: white;
+            border: 4px solid #f1c40f;
+            box-shadow: 0 0 10px rgba(0,0,0,0.2);
+        }
+
+        .heads {
+            background-color: #e67e22;
+        }
+
+        .tails {
+            background-color: #9b59b6;
+            transform: rotateX(180deg);
+        }
+
+        /* Utility classes for state management */
+        .hidden { display: none !important; }
+        .locked-msg { color: #27ae60; font-weight: bold; margin: 15px 0; }
+        #results-panel { margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee; }
+        .winner-text { font-size: 1.2rem; font-weight: bold; color: #e74c3c; margin-top: 10px;}
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Secret Coin Flip</h1>
+    
+    <!-- Step 1: Input Guesses -->
+    <div id="setup-panel">
+        <p>Players, make your guesses!</p>
+        <div class="input-group">
+            <label for="p1-guess">Player 1:</label>
+            <select id="p1-guess">
+                <option value="Heads">Heads</option>
+                <option value="Tails">Tails</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label for="p2-guess">Player 2:</label>
+            <select id="p2-guess">
+                <option value="Heads">Heads</option>
+                <option value="Tails">Tails</option>
+            </select>
+        </div>
+        <button id="lock-btn" onclick="lockGuesses()">Lock Guesses & Hide</button>
+    </div>
+
+    <!-- Step 2: Hidden State & Flip Action -->
+    <div id="action-panel" class="hidden">
+        <div class="locked-msg">🔒 Guesses are locked and hidden!</div>
+        
+        <div id="coin-container" class="coin-container">
+            <div id="coin" class="coin">
+                <div class="coin-face heads">HEADS</div>
+                <div class="coin-face tails">TAILS</div>
+            </div>
+        </div>
+
+        <button id="flip-btn" onclick="flipCoin()">Flip the Coin!</button>
+    </div>
+
+    <!-- Step 3: Reveal Results -->
+    <div id="results-panel" class="hidden">
+        <h3>The Results are in!</h3>
+        <p>Player 1 guessed: <strong id="p1-reveal"></strong></p>
+        <p>Player 2 guessed: <strong id="p2-reveal"></strong></p>
+        <div id="winner-announcement" class="winner-text"></div>
+        <button onclick="resetGame()">Play Again</button>
+    </div>
+
+</div>
+
+<script>
+    let player1Guess = "";
+    let player2Guess = "";
+
+    function lockGuesses() {
+        // Save the guesses
+        player1Guess = document.getElementById('p1-guess').value;
+        player2Guess = document.getElementById('p2-guess').value;
+
+        // Hide setup, show action panel
+        document.getElementById('setup-panel').classList.add('hidden');
+        document.getElementById('action-panel').classList.remove('hidden');
+        document.getElementById('coin-container').style.display = 'block';
+    }
+
+    function flipCoin() {
+        const flipBtn = document.getElementById('flip-btn');
+        flipBtn.disabled = true;
+        flipBtn.innerText = "Flipping...";
+
+        const coin = document.getElementById('coin');
+        
+        // Determine the result (0 = Heads, 1 = Tails)
+        const isHeads = Math.random() < 0.5;
+        const resultText = isHeads ? "Heads" : "Tails";
+
+        // Calculate rotation for animation
+        // Add multiple spins (1800deg = 5 full spins) plus extra 180 if tails
+        const spins = 1800; 
+        const rotation = isHeads ? spins : spins + 180;
+        
+        coin.style.transform = `rotateX(${rotation}deg)`;
+
+        // Wait for animation to finish (2 seconds) before revealing
+        setTimeout(() => {
+            revealResults(resultText);
+            flipBtn.classList.add('hidden'); // Hide flip button after flipping
+        }, 2000);
+    }
+
+    function revealResults(coinResult) {
+        document.getElementById('results-panel').classList.remove('hidden');
+        
+        // Reveal guesses
+        document.getElementById('p1-reveal').innerText = player1Guess;
+        document.getElementById('p2-reveal').innerText = player2Guess;
+
+        // Determine winner
+        let winnerMessage = "";
+        const p1Correct = (player1Guess === coinResult);
+        const p2Correct = (player2Guess === coinResult);
+
+        if (p1Correct && p2Correct) {
+            winnerMessage = `Coin landed on ${coinResult}! Both players win! 🎉`;
+        } else if (p1Correct) {
+            winnerMessage = `Coin landed on ${coinResult}! Player 1 wins! 🏆`;
+        } else if (p2Correct) {
+            winnerMessage = `Coin landed on ${coinResult}! Player 2 wins! 🏆`;
+        } else {
+            winnerMessage = `Coin landed on ${coinResult}! Neither player wins. 💀`;
+        }
+
+        document.getElementById('winner-announcement').innerText = winnerMessage;
+    }
+
+    function resetGame() {
+        // Reset variables and UI states
+        player1Guess = "";
+        player2Guess = "";
+        
+        const coin = document.getElementById('coin');
+        coin.style.transition = 'none'; // Temporarily remove transition to snap back
+        coin.style.transform = `rotateX(0deg)`;
+        
+        // Force reflow so the transition removal takes effect immediately
+        void coin.offsetWidth; 
+        coin.style.transition = 'transform 2s ease-in-out'; // Restore transition
+
+        document.getElementById('setup-panel').classList.remove('hidden');
+        document.getElementById('action-panel').classList.add('hidden');
+        document.getElementById('results-panel').classList.add('hidden');
+        
+        const flipBtn = document.getElementById('flip-btn');
+        flipBtn.classList.remove('hidden');
+        flipBtn.disabled = false;
+        flipBtn.innerText = "Flip the Coin!";
+    }
+</script>
+
+</body>
+</html>
