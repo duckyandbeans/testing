@@ -32,31 +32,47 @@
             color: #2c3e50;
         }
 
+        h2 {
+            color: #34495e;
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+        }
+
+        .instruction {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+        }
+
         .input-group {
             margin: 15px 0;
             display: flex;
-            justify-content: space-between;
+            flex-direction: column;
             align-items: center;
+            gap: 10px;
         }
 
         select {
-            padding: 8px 12px;
+            padding: 10px 20px;
             border-radius: 6px;
-            border: 1px solid #ccc;
+            border: 2px solid #bdc3c7;
             font-size: 16px;
+            width: 80%;
+            cursor: pointer;
         }
 
         button {
             background-color: #3498db;
             color: white;
             border: none;
-            padding: 10px 20px;
+            padding: 12px 20px;
             font-size: 16px;
             border-radius: 6px;
             cursor: pointer;
             transition: background-color 0.3s;
             margin-top: 15px;
             width: 100%;
+            font-weight: bold;
         }
 
         button:hover {
@@ -123,29 +139,35 @@
 <div class="container">
     <h1>Secret Coin Flip</h1>
     
-    <!-- Step 1: Input Guesses -->
-    <div id="setup-panel">
-        <p>Players, make your guesses!</p>
+    <!-- Step 1: Player 1 Turn -->
+    <div id="p1-setup">
+        <h2>Player 1's Turn</h2>
+        <p class="instruction">Player 2, look away! Player 1, make your guess.</p>
         <div class="input-group">
-            <label for="p1-guess">Player 1:</label>
             <select id="p1-guess">
                 <option value="Heads">Heads</option>
                 <option value="Tails">Tails</option>
             </select>
         </div>
+        <button onclick="lockPlayer1()">Lock Player 1 Guess</button>
+    </div>
+
+    <!-- Step 2: Player 2 Turn (Hidden initially) -->
+    <div id="p2-setup" class="hidden">
+        <h2>Player 2's Turn</h2>
+        <p class="instruction">Player 1's guess is safely hidden. Player 2, make your guess.</p>
         <div class="input-group">
-            <label for="p2-guess">Player 2:</label>
             <select id="p2-guess">
                 <option value="Heads">Heads</option>
                 <option value="Tails">Tails</option>
             </select>
         </div>
-        <button id="lock-btn" onclick="lockGuesses()">Lock Guesses & Hide</button>
+        <button onclick="lockPlayer2()">Lock Player 2 Guess</button>
     </div>
 
-    <!-- Step 2: Hidden State & Flip Action -->
+    <!-- Step 3: Hidden State & Flip Action -->
     <div id="action-panel" class="hidden">
-        <div class="locked-msg">🔒 Guesses are locked and hidden!</div>
+        <div class="locked-msg">🔒 Both guesses are locked in secret!</div>
         
         <div id="coin-container" class="coin-container">
             <div id="coin" class="coin">
@@ -157,7 +179,7 @@
         <button id="flip-btn" onclick="flipCoin()">Flip the Coin!</button>
     </div>
 
-    <!-- Step 3: Reveal Results -->
+    <!-- Step 4: Reveal Results -->
     <div id="results-panel" class="hidden">
         <h3>The Results are in!</h3>
         <p>Player 1 guessed: <strong id="p1-reveal"></strong></p>
@@ -172,13 +194,21 @@
     let player1Guess = "";
     let player2Guess = "";
 
-    function lockGuesses() {
-        // Save the guesses
+    function lockPlayer1() {
+        // Save Player 1's guess
         player1Guess = document.getElementById('p1-guess').value;
+        
+        // Hide Player 1's screen, show Player 2's screen
+        document.getElementById('p1-setup').classList.add('hidden');
+        document.getElementById('p2-setup').classList.remove('hidden');
+    }
+
+    function lockPlayer2() {
+        // Save Player 2's guess
         player2Guess = document.getElementById('p2-guess').value;
 
-        // Hide setup, show action panel
-        document.getElementById('setup-panel').classList.add('hidden');
+        // Hide Player 2's screen, show the flipping action panel
+        document.getElementById('p2-setup').classList.add('hidden');
         document.getElementById('action-panel').classList.remove('hidden');
         document.getElementById('coin-container').style.display = 'block';
     }
@@ -238,6 +268,10 @@
         player1Guess = "";
         player2Guess = "";
         
+        // Reset dropdowns to default
+        document.getElementById('p1-guess').value = "Heads";
+        document.getElementById('p2-guess').value = "Heads";
+        
         const coin = document.getElementById('coin');
         coin.style.transition = 'none'; // Temporarily remove transition to snap back
         coin.style.transform = `rotateX(0deg)`;
@@ -246,7 +280,9 @@
         void coin.offsetWidth; 
         coin.style.transition = 'transform 2s ease-in-out'; // Restore transition
 
-        document.getElementById('setup-panel').classList.remove('hidden');
+        // Bring back Player 1's screen, hide everything else
+        document.getElementById('p1-setup').classList.remove('hidden');
+        document.getElementById('p2-setup').classList.add('hidden');
         document.getElementById('action-panel').classList.add('hidden');
         document.getElementById('results-panel').classList.add('hidden');
         
