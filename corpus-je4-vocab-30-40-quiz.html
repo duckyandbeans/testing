@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vocabulary Review Quiz</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        h1, h2 {
+            text-align: center;
+            color: #2c3e50;
+        }
+        .instructions {
+            background-color: #e8f4f8;
+            padding: 15px;
+            border-left: 5px solid #3498db;
+            margin-bottom: 30px;
+            border-radius: 4px;
+        }
+        .question-card {
+            background: #fff;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: border 0.3s;
+        }
+        .question-text {
+            font-weight: 600;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+        .options label {
+            display: block;
+            margin-bottom: 10px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+        .options label:hover {
+            background-color: #f0f0f0;
+        }
+        input[type="radio"] {
+            margin-right: 10px;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1em;
+            margin-top: 5px;
+        }
+        .section-title {
+            margin-top: 40px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #bdc3c7;
+            padding-bottom: 10px;
+            color: #2980b9;
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2em;
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 30px;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background-color: #2ecc71;
+        }
+        #results {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 1.5em;
+            font-weight: bold;
+            display: none;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .correct { background-color: #d4edda !important; border: 1px solid #c3e6cb; }
+        .incorrect { background-color: #f8d7da !important; border: 1px solid #f5c6cb; }
+        .feedback {
+            font-size: 0.9em;
+            margin-top: 10px;
+            font-weight: bold;
+            display: none;
+        }
+        .correct-text { color: #155724; }
+        .incorrect-text { color: #721c24; }
+    </style>
+</head>
+<body>
+
+    <h1>Workbook Vocabulary Review</h1>
+    <div class="instructions">
+        <p><strong>Instructions:</strong> Complete the 60 questions below. They cover general vocabulary, idioms, synonyms, antonyms, word forms, and English-Indonesian translations based on your exercises. Good luck!</p>
+    </div>
+
+    <form id="quizForm">
+        <div id="quiz-container"></div>
+        <button type="button" onclick="submitQuiz()">Submit Quiz</button>
+    </form>
+
+    <div id="results"></div>
+
+    <script>
+        const questions = [
+            // Section 1: Fill in the blanks (General Vocabulary)
+            { type: 'header', text: 'Part 1: General Vocabulary in Context' },
+            { type: 'mcq', q: 'Water is important to all living ___.', options: ['things', 'purposes', 'irrigation', 'drought'], a: 'things' },
+            { type: 'mcq', q: 'We need water to ___ our thirst.', options: ['quench', 'wasted', 'enough', 'alive'], a: 'quench' },
+            { type: 'mcq', q: 'Crops cannot survive for long periods without water during a ___.', options: ['drought', 'commotion', 'irrigation', 'purposes'], a: 'drought' },
+            { type: 'mcq', q: 'Many people use water ___, resulting in waste.', options: ['carelessly', 'gladly', 'suspiciously', 'tightly'], a: 'carelessly' },
+            { type: 'mcq', q: 'We joined the crowd to see what the cause of the ___ was.', options: ['commotion', 'recognition', 'explanation', 'imagination'], a: 'commotion' },
+            { type: 'mcq', q: 'A ___ of robbers is believed to be the same one which robbed the goldsmith shop.', options: ['gang', 'bunch', 'group', 'band'], a: 'gang' },
+            { type: 'mcq', q: 'The ___ sentenced the accused to a year\'s imprisonment.', options: ['judge', 'jury', 'lawyer', 'police'], a: 'judge' },
+            { type: 'mcq', q: 'She is working as an English-Malay ___ in the Court.', options: ['interpreter', 'speaker', 'lecturer', 'linguist'], a: 'interpreter' },
+            { type: 'mcq', q: 'The guest of honour was presented with a ___ of fresh flowers.', options: ['bouquet', 'bundle', 'clump', 'stack'], a: 'bouquet' },
+            { type: 'mcq', q: 'The clown ___ the audience with his funny acts.', options: ['amused', 'pleased', 'tricked', 'presented'], a: 'amused' },
+
+            // Section 2: Phrasal Verbs and Idioms
+            { type: 'header', text: 'Part 2: Phrasal Verbs & Expressions' },
+            { type: 'mcq', q: 'As we were going uphill, our car suddenly ___ (stopped moving).', options: ['broke down', 'broke up', 'broke off', 'broke away'], a: 'broke down' },
+            { type: 'mcq', q: 'We bought the train tickets to Penang two weeks ___ (in advance).', options: ['earlier', 'faster', 'later', 'immediately'], a: 'earlier' },
+            { type: 'mcq', q: 'She resigned because she could not ___ the demanding job.', options: ['cope with', 'settle', 'finish', 'understand'], a: 'cope with' },
+            { type: 'mcq', q: 'I am sure your parents will ___ you for this minor mistake.', options: ['pardon', 'allow', 'condemn', 'reprimand'], a: 'pardon' },
+            { type: 'mcq', q: 'I will ___ your offer and let you know my decision by tomorrow.', options: ['reconsider', 'recollect', 'remember', 'memorize'], a: 'reconsider' },
+            { type: 'mcq', q: 'The principal will not ___ any form of misbehaviour among the pupils.', options: ['put up with', 'permit', 'forgive', 'entertain'], a: 'put up with' },
+            { type: 'mcq', q: 'After each meal, the old man goes for a slow walk, or a ___, in the park.', options: ['stroll', 'pace', 'march', 'wander'], a: 'stroll' },
+            { type: 'mcq', q: 'After much persuasion, Linda finally ___ and bought a set of cosmetics.', options: ['gave in', 'accepted', 'resigned', 'assisted'], a: 'gave in' },
+            { type: 'mcq', q: '"I hope you will ___ after this incident," Mr Li said to his son.', options: ['mend your ways', 'take care of yourself', 'repair yourself', 'upgrade yourself'], a: 'mend your ways' },
+            { type: 'mcq', q: 'To avoid knocking the boy down, the driver quickly ___ the car to the left.', options: ['swerved', 'turned', 'shifted', 'cornered'], a: 'swerved' },
+
+            // Section 3: Synonyms
+            { type: 'header', text: 'Part 3: Synonyms (Similar Meaning)' },
+            { type: 'mcq', q: 'Assaulted:', options: ['attacked', 'punished', 'murdered', 'kidnapped'], a: 'attacked' },
+            { type: 'mcq', q: 'Show some thought for others:', options: ['be considerate', 'be helpful', 'be generous', 'be kind'], a: 'be considerate' },
+            { type: 'mcq', q: 'Keen and watchful:', options: ['alert', 'fierce', 'awake', 'lively'], a: 'alert' },
+            { type: 'mcq', q: 'Culprit who damages public property:', options: ['vandal', 'bandit', 'burglar', 'criminal'], a: 'vandal' },
+            { type: 'mcq', q: 'Total number of people living in the country:', options: ['population', 'inhabitants', 'residents', 'people'], a: 'population' },
+            { type: 'mcq', q: 'Without excitement:', options: ['calmly', 'slowly', 'softly', 'bravely'], a: 'calmly' },
+            { type: 'mcq', q: 'Paddle their own canoe:', options: ['be independent', 'be lively', 'defend themselves', 'solve their own problems'], a: 'be independent' },
+            { type: 'mcq', q: 'Bracelets, necklaces, rings and earrings:', options: ['jewellery', 'crockery', 'cutlery', 'accessories'], a: 'jewellery' },
+            { type: 'mcq', q: 'At loggerheads:', options: ['disagreeing', 'shouting', 'yelling', 'hugging'], a: 'disagreeing' },
+            { type: 'mcq', q: 'Filled with too many people:', options: ['overcrowded', 'overspent', 'overstrained', 'overweight'], a: 'overcrowded' },
+
+            // Section 4: Antonyms
+            { type: 'header', text: 'Part 4: Antonyms (Opposite Meaning)' },
+            { type: 'mcq', q: 'Demolish:', options: ['build', 'destroy', 'ruin', 'abolish'], a: 'build' },
+            { type: 'mcq', q: 'Unknown:', options: ['famous', 'popular', 'unpopular', 'hidden'], a: 'famous' },
+            { type: 'mcq', q: 'Loss:', options: ['profit', 'gain', 'debt', 'win'], a: 'profit' },
+            { type: 'mcq', q: 'Miser:', options: ['spendthrift', 'thrifty', 'stingy', 'miserly'], a: 'spendthrift' },
+            { type: 'mcq', q: 'Laughed:', options: ['cried', 'smiled', 'shouted', 'yelled'], a: 'cried' },
+            { type: 'mcq', q: 'True:', options: ['false', 'real', 'fake', 'honest'], a: 'false' },
+            { type: 'mcq', q: 'Liquid:', options: ['solid', 'gas', 'hard', 'soft'], a: 'solid' },
+            { type: 'mcq', q: 'Shy:', options: ['confident', 'timid', 'quiet', 'loud'], a: 'confident' },
+            { type: 'mcq', q: 'Winter:', options: ['summer', 'spring', 'autumn', 'fall'], a: 'summer' },
+            { type: 'mcq', q: 'Ugly:', options: ['beautiful', 'hideous', 'scary', 'plain'], a: 'beautiful' },
+
+            // Section 5: Word Forms & Specific Nouns
+            { type: 'header', text: 'Part 5: Word Forms & Specific Nouns (Type the correct word)' },
+            { type: 'text', q: 'I am sure she would __________ (glad) lend you her book if you ask.', a: 'gladly' },
+            { type: 'text', q: 'The assistant storekeeper was dismissed because of his __________ (lazy).', a: 'laziness' },
+            { type: 'text', q: 'It is only your __________ (imagine). There is nothing out there.', a: 'imagination' },
+            { type: 'text', q: 'We saw a man loitering __________ (suspicion) at the back of the house.', a: 'suspiciously' },
+            { type: 'text', q: 'The __________ (serve) in that restaurant is excellent.', a: 'service' },
+            { type: 'text', q: 'We heard the sound of children\'s __________ (laugh) in the room.', a: 'laughter' },
+            { type: 'text', q: 'Everyone stood at attention when the __________ (nation) anthem was played.', a: 'national' },
+            { type: 'text', q: 'Most young children are very active and __________ (energy).', a: 'energetic' },
+            { type: 'text', q: 'The young of an ant is called a __________. (Hint: starts with "g")', a: 'grub' },
+            { type: 'text', q: 'A person who manages funerals is called an __________. (Hint: starts with "u")', a: 'undertaker' },
+
+            // Section 6: Translation
+            { type: 'header', text: 'Part 6: Translation (English ↔ Indonesian)' },
+            { type: 'mcq', q: 'What is the Indonesian translation for "Commotion"?', options: ['Keributan', 'Ketenangan', 'Kemarau', 'Kebahagiaan'], a: 'Keributan' },
+            { type: 'mcq', q: 'What is the Indonesian translation for "Interpreter"?', options: ['Penerjemah', 'Hakim', 'Pengacara', 'Polisi'], a: 'Penerjemah' },
+            { type: 'mcq', q: 'What is the Indonesian translation for "Drought"?', options: ['Kemarau', 'Banjir', 'Badai', 'Hujan'], a: 'Kemarau' },
+            { type: 'mcq', q: 'What is the Indonesian translation for "Swerved" (changed direction suddenly)?', options: ['Banting setir', 'Mengerem mendadak', 'Menabrak', 'Berhenti'], a: 'Banting setir' },
+            { type: 'mcq', q: 'What is the Indonesian translation for "Overcrowded"?', options: ['Terlalu sesak', 'Kosong', 'Luas', 'Sepi'], a: 'Terlalu sesak' },
+            { type: 'mcq', q: 'What is the English translation for "Pemboros"?', options: ['Spendthrift', 'Miser', 'Thrifty', 'Stingy'], a: 'Spendthrift' },
+            { type: 'mcq', q: 'What is the English translation for "Truk derek"?', options: ['Tow-truck', 'Garbage truck', 'Incinerator', 'Ambulance'], a: 'Tow-truck' },
+            { type: 'mcq', q: 'What is the English translation for "Perhiasan"?', options: ['Jewellery', 'Cutlery', 'Crockery', 'Accessories'], a: 'Jewellery' },
+            { type: 'mcq', q: 'What is the English translation for "Menyerang"?', options: ['Assault', 'Pardon', 'Mend', 'Stroll'], a: 'Assault' },
+            { type: 'mcq', q: 'What is the English translation for "Karangan bunga"?', options: ['Bouquet', 'Bundle', 'Clump', 'Stack'], a: 'Bouquet' }
+        ];
+
+        const container = document.getElementById('quiz-container');
+        let questionCounter = 1;
+
+        questions.forEach((item, index) => {
+            if (item.type === 'header') {
+                const header = document.createElement('h2');
+                header.className = 'section-title';
+                header.textContent = item.text;
+                container.appendChild(header);
+            } else {
+                const card = document.createElement('div');
+                card.className = 'question-card';
+                card.id = `card-${index}`;
+
+                const qText = document.createElement('div');
+                qText.className = 'question-text';
+                qText.textContent = `${questionCounter}. ${item.q}`;
+                card.appendChild(qText);
+
+                if (item.type === 'mcq') {
+                    const optionsDiv = document.createElement('div');
+                    optionsDiv.className = 'options';
+                    item.options.forEach((opt) => {
+                        const label = document.createElement('label');
+                        const input = document.createElement('input');
+                        input.type = 'radio';
+                        input.name = `q${index}`;
+                        input.value = opt;
+                        label.appendChild(input);
+                        label.appendChild(document.createTextNode(opt));
+                        optionsDiv.appendChild(label);
+                    });
+                    card.appendChild(optionsDiv);
+                } else if (item.type === 'text') {
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.id = `q${index}`;
+                    input.placeholder = 'Type your answer here...';
+                    card.appendChild(input);
+                }
+
+                const feedback = document.createElement('div');
+                feedback.className = 'feedback';
+                feedback.id = `feedback-${index}`;
+                card.appendChild(feedback);
+
+                container.appendChild(card);
+                questionCounter++;
+            }
+        });
+
+        function submitQuiz() {
+            let score = 0;
+            let totalQuestions = 60;
+
+            questions.forEach((item, index) => {
+                if (item.type === 'header') return;
+
+                const card = document.getElementById(`card-${index}`);
+                const feedback = document.getElementById(`feedback-${index}`);
+                let isCorrect = false;
+                let userAnswer = '';
+
+                if (item.type === 'mcq') {
+                    const selected = document.querySelector(`input[name="q${index}"]:checked`);
+                    if (selected) {
+                        userAnswer = selected.value;
+                        if (userAnswer === item.a) isCorrect = true;
+                    }
+                } else if (item.type === 'text') {
+                    const inputVal = document.getElementById(`q${index}`).value.trim().toLowerCase();
+                    userAnswer = inputVal;
+                    if (inputVal === item.a.toLowerCase()) isCorrect = true;
+                }
+
+                feedback.style.display = 'block';
+                if (isCorrect) {
+                    score++;
+                    card.className = 'question-card correct';
+                    feedback.textContent = '✓ Correct';
+                    feedback.className = 'feedback correct-text';
+                } else {
+                    card.className = 'question-card incorrect';
+                    feedback.innerHTML = `✗ Incorrect. The correct answer is: <strong>${item.a}</strong>`;
+                    feedback.className = 'feedback incorrect-text';
+                }
+            });
+
+            const resultsDiv = document.getElementById('results');
+            const percentage = ((score / totalQuestions) * 100).toFixed(1);
+            resultsDiv.style.display = 'block';
+            resultsDiv.innerHTML = `You scored ${score} out of ${totalQuestions} (${percentage}%)`;
+            
+            // Scroll to results
+            resultsDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
